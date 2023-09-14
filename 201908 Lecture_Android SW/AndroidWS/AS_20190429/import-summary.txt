@@ -1,0 +1,80 @@
+ECLIPSE ANDROID PROJECT IMPORT SUMMARY
+======================================
+
+Ignored Files:
+--------------
+The following files were *not* copied into the new Gradle project; you
+should evaluate whether these are still needed in your project and if
+so manually move them:
+
+* proguard-project.txt
+
+Moved Files:
+------------
+Android Gradle projects use a different directory structure than ADT
+Eclipse projects. Here's how the projects were restructured:
+
+* AndroidManifest.xml => orgsmartrobotandroid8154\src\main\AndroidManifest.xml
+* libs\arm64-v8a\libalbert.so => orgsmartrobotandroid8154\src\main\jniLibs\arm64-v8a\libalbert.so
+* libs\arm64-v8a\libalbertpop.so => orgsmartrobotandroid8154\src\main\jniLibs\arm64-v8a\libalbertpop.so
+* libs\arm64-v8a\libalpha.so => orgsmartrobotandroid8154\src\main\jniLibs\arm64-v8a\libalpha.so
+* libs\arm64-v8a\libdice.so => orgsmartrobotandroid8154\src\main\jniLibs\arm64-v8a\libdice.so
+* libs\arm64-v8a\libhamster.so => orgsmartrobotandroid8154\src\main\jniLibs\arm64-v8a\libhamster.so
+* libs\arm64-v8a\libpen.so => orgsmartrobotandroid8154\src\main\jniLibs\arm64-v8a\libpen.so
+* libs\armeabi-v7a\libalbert.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi-v7a\libalbert.so
+* libs\armeabi-v7a\libalbertpop.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi-v7a\libalbertpop.so
+* libs\armeabi-v7a\libalpha.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi-v7a\libalpha.so
+* libs\armeabi-v7a\libdice.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi-v7a\libdice.so
+* libs\armeabi-v7a\libhamster.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi-v7a\libhamster.so
+* libs\armeabi-v7a\libpen.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi-v7a\libpen.so
+* libs\armeabi\libalbert.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi\libalbert.so
+* libs\armeabi\libalbertpop.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi\libalbertpop.so
+* libs\armeabi\libalpha.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi\libalpha.so
+* libs\armeabi\libdice.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi\libdice.so
+* libs\armeabi\libhamster.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi\libhamster.so
+* libs\armeabi\libpen.so => orgsmartrobotandroid8154\src\main\jniLibs\armeabi\libpen.so
+* libs\mips64\libalbert.so => orgsmartrobotandroid8154\src\main\jniLibs\mips64\libalbert.so
+* libs\mips64\libalbertpop.so => orgsmartrobotandroid8154\src\main\jniLibs\mips64\libalbertpop.so
+* libs\mips64\libalpha.so => orgsmartrobotandroid8154\src\main\jniLibs\mips64\libalpha.so
+* libs\mips64\libdice.so => orgsmartrobotandroid8154\src\main\jniLibs\mips64\libdice.so
+* libs\mips64\libhamster.so => orgsmartrobotandroid8154\src\main\jniLibs\mips64\libhamster.so
+* libs\mips64\libpen.so => orgsmartrobotandroid8154\src\main\jniLibs\mips64\libpen.so
+* libs\mips\libalbert.so => orgsmartrobotandroid8154\src\main\jniLibs\mips\libalbert.so
+* libs\mips\libalbertpop.so => orgsmartrobotandroid8154\src\main\jniLibs\mips\libalbertpop.so
+* libs\mips\libalpha.so => orgsmartrobotandroid8154\src\main\jniLibs\mips\libalpha.so
+* libs\mips\libdice.so => orgsmartrobotandroid8154\src\main\jniLibs\mips\libdice.so
+* libs\mips\libhamster.so => orgsmartrobotandroid8154\src\main\jniLibs\mips\libhamster.so
+* libs\mips\libpen.so => orgsmartrobotandroid8154\src\main\jniLibs\mips\libpen.so
+* libs\x86\libalbert.so => orgsmartrobotandroid8154\src\main\jniLibs\x86\libalbert.so
+* libs\x86\libalbertpop.so => orgsmartrobotandroid8154\src\main\jniLibs\x86\libalbertpop.so
+* libs\x86\libalpha.so => orgsmartrobotandroid8154\src\main\jniLibs\x86\libalpha.so
+* libs\x86\libdice.so => orgsmartrobotandroid8154\src\main\jniLibs\x86\libdice.so
+* libs\x86\libhamster.so => orgsmartrobotandroid8154\src\main\jniLibs\x86\libhamster.so
+* libs\x86\libpen.so => orgsmartrobotandroid8154\src\main\jniLibs\x86\libpen.so
+* libs\x86_64\libalbert.so => orgsmartrobotandroid8154\src\main\jniLibs\x86_64\libalbert.so
+* libs\x86_64\libalbertpop.so => orgsmartrobotandroid8154\src\main\jniLibs\x86_64\libalbertpop.so
+* libs\x86_64\libalpha.so => orgsmartrobotandroid8154\src\main\jniLibs\x86_64\libalpha.so
+* libs\x86_64\libdice.so => orgsmartrobotandroid8154\src\main\jniLibs\x86_64\libdice.so
+* libs\x86_64\libhamster.so => orgsmartrobotandroid8154\src\main\jniLibs\x86_64\libhamster.so
+* libs\x86_64\libpen.so => orgsmartrobotandroid8154\src\main\jniLibs\x86_64\libpen.so
+* res\ => orgsmartrobotandroid8154\src\main\res\
+* src\ => orgsmartrobotandroid8154\src\main\java\
+* src\org\smartrobot\android\ipc\ac.aidl => orgsmartrobotandroid8154\src\main\aidl\org\smartrobot\android\ipc\ac.aidl
+* src\org\smartrobot\android\ipc\dc.aidl => orgsmartrobotandroid8154\src\main\aidl\org\smartrobot\android\ipc\dc.aidl
+* src\org\smartrobot\android\ipc\dr.aidl => orgsmartrobotandroid8154\src\main\aidl\org\smartrobot\android\ipc\dr.aidl
+* src\org\smartrobot\android\ipc\rc.aidl => orgsmartrobotandroid8154\src\main\aidl\org\smartrobot\android\ipc\rc.aidl
+
+Next Steps:
+-----------
+You can now build the project. The Gradle project needs network
+connectivity to download dependencies.
+
+Bugs:
+-----
+If for some reason your project does not build, and you determine that
+it is due to a bug or limitation of the Eclipse to Gradle importer,
+please file a bug at http://b.android.com with category
+Component-Tools.
+
+(This import summary is for your information only, and can be deleted
+after import once you are satisfied with the results.)

@@ -1,0 +1,51 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/background"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:paddingLeft="6dp"
+    android:paddingRight="6dp"
+    android:background="#ff272729" >
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginRight="6dp"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/boy"
+        android:contentDescription="@string/boy" />
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textColor="#ffffffff"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:text="@string/name" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textColor="#ff989898"
+            android:textSize="14sp"
+            android:text="@string/number" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_weight="0"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="6dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/phone"
+        android:background="@drawable/button"
+        android:contentDescription="@string/phone" />
+
+</LinearLayout>

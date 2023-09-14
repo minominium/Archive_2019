@@ -1,0 +1,3 @@
+org.smartrobot.android
+string roboid_android_api
+string roboid_smartrobot_api

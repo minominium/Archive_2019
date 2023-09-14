@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AS_20190424</string>
+    <string name="clicked">Clicked</string>
+    <string name="unclicked">Unclicked</string>
+</resources>

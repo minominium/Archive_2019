@@ -1,0 +1,762 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  */
+/* USER CODE END Header */
+
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include<math.h>
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#ifdef __GNUC__
+/* With GCC, small printf (option LD Linker->Libraries->Small printf
+   set to 'Yes') calls __io_putchar() */
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif /* __GNUC__ */
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+ETH_HandleTypeDef heth;
+
+SPI_HandleTypeDef hspi1;
+
+TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim6;
+
+UART_HandleTypeDef huart3;
+
+PCD_HandleTypeDef hpcd_USB_OTG_FS;
+
+/* USER CODE BEGIN PV */
+PUTCHAR_PROTOTYPE
+{
+  /* Place your implementation of fputc here */
+  /* e.g. write a character to the USART3 and Loop until the end of transmission */
+  HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, 0xFF);
+
+  return ch;
+}
+/* USER CODE END PV */
+
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_ETH_Init(void);
+static void MX_TIM1_Init(void);
+static void MX_USART3_UART_Init(void);
+static void MX_USB_OTG_FS_PCD_Init(void);
+static void MX_TIM6_Init(void);
+static void MX_TIM2_Init(void);
+static void MX_SPI1_Init(void);
+/* USER CODE BEGIN PFP */
+void SS_pin_High();
+void SS_pin_Low();
+uint8_t SPI_T(uint8_t data);
+void start();
+void set_zero();
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+uint16_t ABSposition = 0; //초기 각도 확인을 위한 변수
+uint16_t abencoder = 0; //이후 앱솔루트 엔코더의 각도 변수
+int32_t EncoderCounter = 0; //인클리멘털 엔코더 변수
+int8_t Direction = 0; //인클리멘털 엔코더 방향 변수
+int deg = 0; //앱솔루트 엔코더 각도 변수
+int deg_last = 0; //앱솔루트 엔코더 초기값 각도 변수
+double dis = 0.0; //인크리 멘털 카운터를 이용한 줄길이 변수
+
+//줄 길이 제어 변수
+//Gain
+double kp = 0.63;
+double kd = 0.05;
+
+double E = 0.0;
+double preE = 0.0;
+double pre_dis = 0.0;
+double dt = 0.1;
+
+
+//제어주기 만드는 함수 0.1초 (100ms)
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+   if(htim == &htim6)
+   {
+      //incremental encoder
+      double result = 0.0;
+      EncoderCounter = TIM1->CNT;
+      Direction = __HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1);
+      dis = EncoderCounter*6.28/300;
+      
+      // 줄길이 PD 제어 부분
+      //레퍼런스 값 -> delta거리 * dt로 선정
+      E = dis - (dis - pre_dis)/dt;
+      result = E*kp + kd*(E-preE)/dt;
+      pre_dis = dis;
+      preE = E;
+
+      //제어된 결과 값과 방향출력
+      printf("Counter = %d, Direction = %d\r\n", (int)(result), Direction);
+      
+      //줄길이가 너무 길 경우 사용자에게 부저로 알림
+      if(EncoderCounter == 14424)
+      {
+         //buzzer
+      }
+      
+      //absolute encoder
+      abencoder = TIM2->CNT;
+      deg = abencoder * 360 /2048; //Pulse로 앱솔루트 엔코더의 값을 받게 될 경우 resolution이 2048
+      deg += deg_last;  //SPI 통신으로 받은 초기 값을 현재 0도부터 움직인 값(인크리멘탈) 값에 더해줌
+      if(deg > 360) // 360도를 넘어갈 경우 값 조정 
+      {
+         deg = deg - 360;
+         if(deg > 360)
+         {  deg = deg - 360; }
+      }
+      printf("deg : %d\r\n", deg);
+   }
+}
+/* USER CODE END 0 */
+
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+  
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_ETH_Init();
+  MX_TIM1_Init();
+  MX_USART3_UART_Init();
+  MX_USB_OTG_FS_PCD_Init();
+  MX_TIM6_Init();
+  MX_TIM2_Init();
+  MX_SPI1_Init();
+  /* USER CODE BEGIN 2 */
+  
+  printf("start\r\n");
+  SS_pin_High(); //SPI 통신 ENABlE
+  start(); //엔코더 초기값을 얻기위한 SPI 통신
+  deg_last = ABSposition; //통신을 통해 얻은 초기 각도 값 
+  deg_last = deg_last * 360 /4096; //각도값을 degree로 변환
+  printf("inital_value : %d\r\n", deg_last); //초기각도 값 출력
+  
+  //TIMER 시작 (TIMER1 : 인크리멘탈 엔코더, TIMER2 : 앱솔루트 엔코더
+  HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL); //incremental encoder start function
+  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL); //absolute encoder start function
+  
+  // 제어주기 시작 (TIMER6) 0.1s
+  HAL_TIM_Base_Start_IT(&htim6);
+  //set_zero();
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the main internal regulator output voltage 
+  */
+  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+  /** Initializes the CPU, AHB and APB busses clocks 
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Initializes the CPU, AHB and APB busses clocks 
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief ETH Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ETH_Init(void)
+{
+
+  /* USER CODE BEGIN ETH_Init 0 */
+
+  /* USER CODE END ETH_Init 0 */
+
+   uint8_t MACAddr[6] ;
+
+  /* USER CODE BEGIN ETH_Init 1 */
+
+  /* USER CODE END ETH_Init 1 */
+  heth.Instance = ETH;
+  heth.Init.AutoNegotiation = ETH_AUTONEGOTIATION_ENABLE;
+  heth.Init.PhyAddress = LAN8742A_PHY_ADDRESS;
+  MACAddr[0] = 0x00;
+  MACAddr[1] = 0x80;
+  MACAddr[2] = 0xE1;
+  MACAddr[3] = 0x00;
+  MACAddr[4] = 0x00;
+  MACAddr[5] = 0x00;
+  heth.Init.MACAddr = &MACAddr[0];
+  heth.Init.RxMode = ETH_RXPOLLING_MODE;
+  heth.Init.ChecksumMode = ETH_CHECKSUM_BY_HARDWARE;
+  heth.Init.MediaInterface = ETH_MEDIA_INTERFACE_RMII;
+
+  /* USER CODE BEGIN MACADDRESS */
+    
+  /* USER CODE END MACADDRESS */
+
+  if (HAL_ETH_Init(&heth) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ETH_Init 2 */
+
+  /* USER CODE END ETH_Init 2 */
+
+}
+
+/**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+
+  /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_Encoder_InitTypeDef sConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 0;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 14424;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
+  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC1Filter = 0;
+  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC2Filter = 0;
+  if (HAL_TIM_Encoder_Init(&htim1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_Encoder_InitTypeDef sConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 0;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 4096;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
+  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC1Filter = 0;
+  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
+  sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
+  sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
+  sConfig.IC2Filter = 0;
+  if (HAL_TIM_Encoder_Init(&htim2, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+
+}
+
+/**
+  * @brief TIM6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM6_Init(void)
+{
+
+  /* USER CODE BEGIN TIM6_Init 0 */
+
+  /* USER CODE END TIM6_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM6_Init 1 */
+
+  /* USER CODE END TIM6_Init 1 */
+  htim6.Instance = TIM6;
+  htim6.Init.Prescaler = 42000-1;
+  htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim6.Init.Period = 200-1;
+  htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim6, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM6_Init 2 */
+
+  /* USER CODE END TIM6_Init 2 */
+
+}
+
+/**
+  * @brief USART3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART3_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART3_Init 0 */
+
+  /* USER CODE END USART3_Init 0 */
+
+  /* USER CODE BEGIN USART3_Init 1 */
+
+  /* USER CODE END USART3_Init 1 */
+  huart3.Instance = USART3;
+  huart3.Init.BaudRate = 115200;
+  huart3.Init.WordLength = UART_WORDLENGTH_8B;
+  huart3.Init.StopBits = UART_STOPBITS_1;
+  huart3.Init.Parity = UART_PARITY_NONE;
+  huart3.Init.Mode = UART_MODE_TX_RX;
+  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART3_Init 2 */
+
+  /* USER CODE END USART3_Init 2 */
+
+}
+
+/**
+  * @brief USB_OTG_FS Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USB_OTG_FS_PCD_Init(void)
+{
+
+  /* USER CODE BEGIN USB_OTG_FS_Init 0 */
+
+  /* USER CODE END USB_OTG_FS_Init 0 */
+
+  /* USER CODE BEGIN USB_OTG_FS_Init 1 */
+
+  /* USER CODE END USB_OTG_FS_Init 1 */
+  hpcd_USB_OTG_FS.Instance = USB_OTG_FS;
+  hpcd_USB_OTG_FS.Init.dev_endpoints = 4;
+  hpcd_USB_OTG_FS.Init.speed = PCD_SPEED_FULL;
+  hpcd_USB_OTG_FS.Init.dma_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
+  hpcd_USB_OTG_FS.Init.Sof_enable = ENABLE;
+  hpcd_USB_OTG_FS.Init.low_power_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.lpm_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.vbus_sensing_enable = ENABLE;
+  hpcd_USB_OTG_FS.Init.use_dedicated_ep1 = DISABLE;
+  if (HAL_PCD_Init(&hpcd_USB_OTG_FS) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USB_OTG_FS_Init 2 */
+
+  /* USER CODE END USB_OTG_FS_Init 2 */
+
+}
+
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOE_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOG_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(SPI1_SS_GPIO_Port, SPI1_SS_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, LD3_Pin|LD2_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(USB_PowerSwitchOn_GPIO_Port, USB_PowerSwitchOn_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : USER_Btn_Pin */
+  GPIO_InitStruct.Pin = USER_Btn_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(USER_Btn_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SPI1_SS_Pin */
+  GPIO_InitStruct.Pin = SPI1_SS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(SPI1_SS_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SetZBtn_Pin */
+  GPIO_InitStruct.Pin = SetZBtn_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(SetZBtn_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : LD3_Pin LD2_Pin */
+  GPIO_InitStruct.Pin = LD3_Pin|LD2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : USB_PowerSwitchOn_Pin */
+  GPIO_InitStruct.Pin = USB_PowerSwitchOn_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(USB_PowerSwitchOn_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : USB_OverCurrent_Pin */
+  GPIO_InitStruct.Pin = USB_OverCurrent_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(USB_OverCurrent_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LD1_Pin */
+  GPIO_InitStruct.Pin = LD1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LD1_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+}
+
+/* USER CODE BEGIN 4 */
+
+//SPI ENABLE 함수
+void SS_pin_High() //통신 멈춤 (1)
+{
+   HAL_GPIO_WritePin(SPI1_SS_GPIO_Port, SPI1_SS_Pin, GPIO_PIN_SET);
+}
+void SS_pin_Low() //통신 시작 (0)
+{
+   HAL_GPIO_WritePin(SPI1_SS_GPIO_Port, SPI1_SS_Pin, GPIO_PIN_RESET);
+}
+
+//spi 통신하는 함수
+uint8_t SPI_T(uint8_t data) //0x00
+{
+   uint8_t data_msg[1] = {0};
+   uint8_t tx_data[1] = {data};
+   int state1;
+   //int state2;
+   SS_pin_Low(); //통신 시작
+   state1 = HAL_SPI_TransmitReceive(&hspi1, tx_data, data_msg, 1, 1000);
+   //HAL_SPI_Transmit(&hspi1, &data, 1, 500);
+   //state1 = HAL_SPI_Receive(&hspi1, &data_msg, 1, 500);
+
+   //통신이 잘 되었는지 확인
+   if(state1 != HAL_OK)
+   {
+      //state = HAL_SPI_TransmitReceive(&hspi1, data, &data_msg, 1, 20);
+      printf("tx : %d\r\n",state1);
+   }
+
+   //HAL_SPI_TxRxCpltCallback(&hspi1);
+   SS_pin_High(); //통신 종료
+
+   //printf("rxdt : 0x%X\r\n",data_msg[0]);
+   HAL_Delay(60);
+   return data_msg[0];
+}
+
+// 앱솔루트 엔코더 값을 얻는 함수 
+void start()
+{
+   uint8_t received = 0xA5;
+   uint8_t temp[2] = {0x00,};//This one.
+   ABSposition = 0;
+   __HAL_SPI_ENABLE(&hspi1);
+   SS_pin_Low();
+
+   SPI_T(0x10);
+   HAL_Delay(10);
+   received = SPI_T(0x00);
+   while(received != 0x10)
+   {
+      received = SPI_T(0x00);
+      printf("0x%X\r\n", received);
+      HAL_Delay(2);
+   }
+
+   temp[0] = SPI_T(0x00);
+   temp[1] = SPI_T(0x00);
+
+   SS_pin_High();
+   __HAL_SPI_DISABLE(&hspi1);
+   //HAL_SPI_TxRxCpltCallback(&hspi1);
+   temp[0] &= ~0xF0;
+
+   ABSposition = temp[0] << 8;    //shift MSB to correct ABSposition in ABSposition message
+   ABSposition += temp[1];    // add LSB to ABSposition message to complete message
+
+   //HAL_Delay(20);
+}
+
+// 앱솔루트 엔코더 영점 처리 함수 (command : 0x70)
+void set_zero()
+{
+   uint8_t received = 0xA5;
+   __HAL_SPI_ENABLE(&hspi1);
+   SS_pin_Low();
+   received = SPI_T(0x70);
+   while(received != 0x80)
+   {
+         received = SPI_T(0x00);
+         HAL_Delay(2);
+   }
+   SS_pin_High();
+   __HAL_SPI_DISABLE(&hspi1);
+   //HAL_Delay(20);
+}
+
+//앱솔루트 엔코더 값 영점을 맞추기 위한 버튼 인터럽트 처리
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+   switch(GPIO_Pin)
+   {
+   case SetZBtn_Pin:
+      //set_zero();
+      break;
+   }
+}
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+
+  /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{ 
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

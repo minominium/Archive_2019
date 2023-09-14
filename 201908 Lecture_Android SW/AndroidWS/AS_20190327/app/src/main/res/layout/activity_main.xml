@@ -1,0 +1,120 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/background"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_centerHorizontal="true"
+        android:background="#ff272729" >
+        <ImageView
+            android:id="@+id/image_boy"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="6dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/boy" />
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_toRightOf="@id/image_boy">
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:layout_toRightOf="@id/image_boy"
+            android:layout_alignTop="@id/image_boy" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="#ffffffff"
+                android:text="@string/name" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:textSize="14sp"
+                android:textColor="#ff989898"
+                android:text="@string/number" />
+        </RelativeLayout>
+        <ImageButton
+            android:id="@+id/button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="6dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/phone"
+            android:background="@drawable/button"
+            android:contentDescription="@string/phone" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/background2"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/background" >
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/background1"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_below="@id/background2"
+        android:background="#ff272729" >
+        <ImageView
+            android:id="@+id/image_girl"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="6dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/girl" />
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_toRightOf="@id/image_girl">
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:layout_toRightOf="@id/image_girl"
+            android:layout_alignTop="@id/image_girl" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="#ffffffff"
+                android:text="@string/name1" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:textSize="14sp"
+                android:textColor="#ff989898"
+                android:text="@string/number1" />
+        </RelativeLayout>
+        <ImageButton
+            android:id="@+id/button1"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="6dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/phone"
+            android:background="@drawable/button"
+            android:contentDescription="@string/phone" />
+    </RelativeLayout>
+</RelativeLayout>

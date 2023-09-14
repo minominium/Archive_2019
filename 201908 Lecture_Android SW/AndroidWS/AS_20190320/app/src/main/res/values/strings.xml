@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">AS_20190320</string>
+    <string name="hello_world">Hello World!</string>
+    <string name="previous">이전</string>
+    <string name="coming">다음</string>
+    <string name="page1">Page.01</string>
+    <string name="page2">Page.02</string>
+    <string name="page3">Page.03</string>
+    <string name="page4">Page.04</string>
+    <string name="page5">Page.05</string>
+</resources>

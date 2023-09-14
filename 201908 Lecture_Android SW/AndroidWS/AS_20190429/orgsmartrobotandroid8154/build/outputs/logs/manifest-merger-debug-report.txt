@@ -1,0 +1,33 @@
+-- Merging decision tree log ---
+manifest
+ADDED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:1:1-6:12
+INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:1:1-6:12
+INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:1:1-6:12
+INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:1:1-6:12
+INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:1:1-6:12
+INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:1:1-6:12
+INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:1:1-6:12
+	package
+		ADDED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:2:2-34
+		INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml
+	android:versionName
+		ADDED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:4:2-29
+		INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:1:11-69
+	android:versionCode
+		ADDED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:3:2-25
+		INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml
+uses-sdk
+ADDED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:5:2-40
+INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:5:2-40
+INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:5:2-40
+	android:targetSdkVersion
+		INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml
+		ADDED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:5:2-40
+		INJECTED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		ADDED from C:\Users\hinmo\Documents\AndroidWS\AS_20190429\orgsmartrobotandroid8154\src\main\AndroidManifest.xml:5:12-37

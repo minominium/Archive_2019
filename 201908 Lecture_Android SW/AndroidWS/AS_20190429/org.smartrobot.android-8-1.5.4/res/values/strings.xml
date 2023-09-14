@@ -1,0 +1,4 @@
+<resources>
+	<string name="roboid_android_api">8</string>
+	<string name="roboid_smartrobot_api">1.5.4</string>
+</resources>
